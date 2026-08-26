@@ -1,0 +1,22 @@
+    [package]
+    name = "ores-otel-api-server"
+    version = "0.1.0"
+    edition = "2021"
+    license = "MIT"
+    description = "JSON API server for ores-otel"
+    repository = "https://github.com/ores-otel/ores-otel-api-server.rs"
+
+    [features]
+    default = ["tcp-transport", "nats-transport"]
+    tcp-transport = []
+    nats-transport = []
+
+    [dependencies]
+    serde = { version = "1", features = ["derive"] }
+    serde_json = "1"
+    thiserror = "2"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+

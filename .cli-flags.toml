@@ -1,0 +1,17 @@
+# flags-2-env surface for `ores-otel-api`
+[flags.config]
+env = "ORES_OTEL_CONFIG"
+long = "config"
+help = "Path to TOML configuration"
+
+[flags.api_base]
+env = "ORES_OTEL_API_BASE"
+long = "api-base"
+help = "API HTTP base URL"
+
+[flags.json]
+env = "ORES_OTEL_JSON"
+long = "json"
+switch = true
+help = "Emit JSON"
+
