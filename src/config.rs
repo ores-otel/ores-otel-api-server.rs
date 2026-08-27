@@ -1,5 +1,9 @@
 #![forbid(unsafe_code)]
 
+#[path = "../generated/rust/env.rs"]
+mod env;
+
+
 use crate::env_map::{value, EnvMap};
 
 #[derive(Clone, Debug)]
@@ -12,11 +16,11 @@ pub struct ApiConfig {
 impl ApiConfig {
     pub fn from_env_map(env: &EnvMap) -> Self {
         Self {
-            bind: value(env, "ORES_OTEL_API_BIND")
+            bind: value(env, env::BIND)
                 .unwrap_or("127.0.0.1:8080")
                 .to_owned(),
-            tcp_bind: value(env, "ORES_OTEL_API_TCP_BIND").map(str::to_owned),
-            nats_url: value(env, "ORES_OTEL_NATS_URL").map(str::to_owned),
+            tcp_bind: value(env, env::TCP_BIND).map(str::to_owned),
+            nats_url: value(env, env::NATS_URL).map(str::to_owned),
         }
     }
 
