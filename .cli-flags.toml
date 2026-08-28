@@ -4,6 +4,9 @@ url = "https://github.com/ores-otel/ores-otel-api-server.rs"
 [parse]
 allow_unknown = false
 
+[env]
+load = false
+
 [flags.bind]
 env = "ORES_OTEL_API_BIND"
 aliases = ["bind"]
