@@ -111,6 +111,7 @@ token stops working on the next frame rather than at the next reconnect.
 
 ## Ordering note
 
-`ores-transport` is currently depended on by `branch = "main"`. Pin it to a rev
-once it is pushed, matching how every other git dependency in this org is
-pinned.
+`ores-transport` is pinned to revision
+`c544e1a11a212dc43a5c1f87ea70a95939e80e2e`, matching the reproducible-build
+policy used by the other git dependencies in this org. Update the revision only
+after reviewing the transport API and regenerating the local lock file.
