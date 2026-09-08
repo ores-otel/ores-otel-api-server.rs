@@ -24,3 +24,7 @@ Cargo.lock
 !/env/enc/dev.env.enc
 !/env/enc/prod.env.enc
 # END ores-sops dotenv policy
+
+# Local temporary directories and repository-owned worktrees
+tmp/
+temp/
