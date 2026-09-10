@@ -1,0 +1,72 @@
+name: Rustfmt one-shot promotion
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rustfmt-promote-once.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rustfmt-promote-once
+  cancel-in-progress: false
+
+jobs:
+  format:
+    if: github.repository == 'ores-otel/ores-otel-api-server.rs' && github.actor == 'ORESoftware' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'feat/four-transports'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact PR head without persisted credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          fetch-depth: 2
+          show-progress: false
+
+      - name: Verify immutable promotion parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = '37c3be9781b56494fc6dbc6665138b0d3538e1c2'
+
+      - name: Install pinned rustfmt
+        run: rustup toolchain install 1.88.0 --profile minimal --component rustfmt
+
+      - name: Format Rust sources only
+        run: cargo +1.88.0 fmt --all
+
+      - name: Require a Rust-source-only formatting diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git diff --name-only)
+          test "${#changed[@]}" -gt 0
+          for path in "${changed[@]}"; do
+            case "$path" in
+              *.rs) ;;
+              *) echo "Refusing non-Rust formatter change: $path" >&2; exit 1 ;;
+            esac
+          done
+
+      - name: Commit deterministic rustfmt output
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- '*.rs'
+          git diff --cached --quiet && { echo 'Expected rustfmt changes.' >&2; exit 1; }
+          git commit -m 'style: apply pinned rustfmt to four-transport branch'
+
+      - name: Push formatted exact head
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_HEAD_REF}"
