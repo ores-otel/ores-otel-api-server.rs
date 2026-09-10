@@ -24,6 +24,9 @@ jobs:
   rust:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+      FLEET_GITHUB_TOKEN: ${{ secrets.FLEET_GITHUB_READ_TOKEN }}
     steps:
       - name: Check out exact source without persisted credentials
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -47,6 +50,16 @@ jobs:
             echo 'Credential-shaped tracked content is forbidden.' >&2
             exit 1
           fi
+
+      - name: Require private dependency credential
+        shell: bash
+        run: test -n "${FLEET_GITHUB_TOKEN}"
+
+      - name: Configure ephemeral GitHub credential helper
+        shell: bash
+        run: >-
+          git config --global credential.https://github.com.helper
+          '!f() { test "$1" = get && echo username=x-access-token && echo "password=$FLEET_GITHUB_TOKEN"; }; f'
 
       - name: Install pinned Rust toolchain
         run: rustup toolchain install 1.88.0 --profile minimal --component clippy,rustfmt
