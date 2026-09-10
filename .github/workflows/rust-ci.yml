@@ -1,0 +1,64 @@
+name: Rust CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'src/**'
+      - 'docs/**'
+      - '.github/workflows/rust-ci.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source without persisted credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+          show-progress: false
+
+      - name: Verify exact head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Reject credential-like tracked content
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -nEI 'gh[pousr]_[A-Za-z0-9]{20,}|lin_api_[A-Za-z0-9]{20,}|BEGIN [A-Z ]*PRIVATE KEY' -- . ':!Cargo.lock'; then
+            echo 'Credential-shaped tracked content is forbidden.' >&2
+            exit 1
+          fi
+
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.88.0 --profile minimal --component clippy,rustfmt
+
+      - name: Resolve dependency graph
+        run: cargo +1.88.0 metadata --format-version 1 --no-deps >/tmp/metadata.json
+
+      - name: Check formatting
+        run: cargo +1.88.0 fmt --all --check
+
+      - name: Lint
+        run: cargo +1.88.0 clippy --all-targets --all-features -- -D warnings
+
+      - name: Test all targets
+        run: cargo +1.88.0 test --all-targets --all-features
