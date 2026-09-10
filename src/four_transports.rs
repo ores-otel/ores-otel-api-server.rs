@@ -20,10 +20,8 @@
 //! operations, then hand the same `Arc` to all three. See
 //! `docs/four-transports.md`.
 
-use ores_transport::{
-    Envelope, NatsSubjects, OperationHandler, Reply, ServeError, serve_envelope,
-};
-use serde::{Serialize, de::DeserializeOwned};
+use ores_transport::{serve_envelope, Envelope, NatsSubjects, OperationHandler, Reply, ServeError};
+use serde::{de::DeserializeOwned, Serialize};
 use std::sync::Arc;
 
 /// Service slug, which derives the NATS subjects and stream names.
@@ -105,9 +103,10 @@ where
 ///
 /// # Errors
 /// [`ores_transport::TransportError::Upstream`] if NATS is unreachable.
-pub async fn jetstream_from_env()
--> Result<Option<ores_transport::async_nats::jetstream::Context>, Box<dyn std::error::Error + Send + Sync>>
-{
+pub async fn jetstream_from_env() -> Result<
+    Option<ores_transport::async_nats::jetstream::Context>,
+    Box<dyn std::error::Error + Send + Sync>,
+> {
     let config = ores_transport::TransportConfig::from_env(ENV_PREFIX)?;
     match config.nats_url.as_deref() {
         None => Ok(None),
