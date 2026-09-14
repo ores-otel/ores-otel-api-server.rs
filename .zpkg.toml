@@ -1,4 +1,24 @@
-name = "ores-otel-api-server.rs"
-kind = "api-server"
+[package]
+org = "ores-otel"
+name = "ores-otel-api-server"
 version = "0.1.0"
+description = "JSON API server for ores-otel"
+license = "MIT"
+language = "rust"
 
+[package.repository]
+vcs = "git"
+url = "https://github.com/ores-otel/ores-otel-api-server.rs"
+
+[build]
+command = "cargo build --release"
+outputs = ["target/release/ores-otel-api-server"]
+
+[install]
+adapter = "none"
+dir = ".vendor/.zed"
+
+[publish]
+include_readme = true
+tag_format = "v{version}"
+exclude = [".env", ".env.*", ".vendor/**", ".zed/**", "target/**", "tmp/**", "**/*.log"]
