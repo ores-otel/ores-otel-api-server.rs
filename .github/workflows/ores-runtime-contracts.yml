@@ -28,8 +28,13 @@ jobs:
           ZED="$RUNNER_TEMP/zed-cli/target/release/zed"
           "$ZED" validate --manifest .zpkg.toml
           "$RUNNER_TEMP/flags2env/build/flags2env" audit .cli-flags.toml
-          "$ZED" install oresoftware/ores-cli@=0.1.0 --allow-build --adapter none
-          "$ZED" run oresc -- --no-json audit repo --path . --profile baseline
-          "$ZED" run ores-cli -- --no-json audit repo --path . --profile baseline
+          TOOL_WS="$RUNNER_TEMP/ores-cli-smoke"
+          mkdir -p "$TOOL_WS"
+          (
+            cd "$TOOL_WS"
+            "$ZED" install oresoftware/ores-cli@=0.1.0 --allow-build --adapter none
+            "$ZED" run oresc -- --no-json audit repo --path "$GITHUB_WORKSPACE" --profile baseline
+            "$ZED" run ores-cli -- --no-json audit repo --path "$GITHUB_WORKSPACE" --profile baseline
+          )
           ! grep -R --line-number --fixed-strings 'github.com/ORESoftware/flags-2-env' Cargo.toml Cargo.lock .zpkg.toml 2>/dev/null
           git diff --exit-code HEAD
