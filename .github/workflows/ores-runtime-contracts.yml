@@ -30,9 +30,17 @@ jobs:
           "$RUNNER_TEMP/flags2env/build/flags2env" audit .cli-flags.toml
           TOOL_WS="$RUNNER_TEMP/ores-cli-smoke"
           mkdir -p "$TOOL_WS"
+          installed=false
+          for attempt in 1 2 3; do
+            if (cd "$TOOL_WS" && "$ZED" install oresoftware/ores-cli@=0.1.0 --allow-build --adapter none); then
+              installed=true
+              break
+            fi
+            sleep $((attempt * 5))
+          done
+          test "$installed" = true
           (
             cd "$TOOL_WS"
-            "$ZED" install oresoftware/ores-cli@=0.1.0 --allow-build --adapter none
             "$ZED" run oresc -- --no-json audit repo --path "$GITHUB_WORKSPACE" --profile baseline
             "$ZED" run ores-cli -- --no-json audit repo --path "$GITHUB_WORKSPACE" --profile baseline
           )
