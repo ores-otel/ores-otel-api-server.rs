@@ -19,6 +19,21 @@ pub const ENV_PREFIX: &str = "ORES_OTEL";
 /// HTTP envelope route owned by the API transport plane.
 pub const ENVELOPE_PATH: &str = "/v1/operations";
 
+/// Startup/serving failures at the shared transport boundary.
+///
+/// Keep the public adapter typed even where `ores-transport` currently exposes
+/// an erased JetStream setup error internally. That prevents this service from
+/// leaking a catch-all error contract into its own call sites.
+#[derive(Debug, thiserror::Error)]
+pub enum SharedTransportError {
+    #[error("transport configuration is invalid: {0}")]
+    Config(#[from] ores_transport::ConfigError),
+    #[error("transport connection failed: {0}")]
+    Connect(#[from] ores_transport::TransportError),
+    #[error("jetstream serving failed: {0}")]
+    JetStream(String),
+}
+
 #[must_use]
 pub fn subjects() -> NatsSubjects {
     NatsSubjects::for_service(SERVICE_SLUG)
@@ -52,12 +67,14 @@ pub async fn serve_stateful<O, T>(
 pub async fn serve_asynchronous<O, T>(
     context: ores_transport::async_nats::jetstream::Context,
     handler: Arc<dyn OperationHandler<O, T>>,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
+) -> Result<(), SharedTransportError>
 where
     O: DeserializeOwned + Send + Sync,
     T: Serialize + Send,
 {
-    ores_transport::serve_jetstream(context, subjects(), handler).await
+    ores_transport::serve_jetstream(context, subjects(), handler)
+        .await
+        .map_err(|error| SharedTransportError::JetStream(error.to_string()))
 }
 
 /// Build a JetStream context from the canonical `ORES_OTEL_*` transport
@@ -65,7 +82,7 @@ where
 /// inventing a fallback endpoint.
 pub async fn jetstream_from_env() -> Result<
     Option<ores_transport::async_nats::jetstream::Context>,
-    Box<dyn std::error::Error + Send + Sync>,
+    SharedTransportError,
 > {
     let config = ores_transport::TransportConfig::from_env(ENV_PREFIX)?;
     match config.nats_url.as_deref() {
