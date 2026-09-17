@@ -58,7 +58,7 @@ mod tests {
 
     #[test]
     fn four_avenues_are_named_and_fail_closed() {
-        validate_four_avenues().expect("four-avenue policies");
+        assert!(validate_four_avenues().is_ok());
         let caps = capabilities();
         assert_eq!(caps.app_host, format!("app.{DNS_ZONE}"));
         assert_eq!(caps.api_host, format!("api.{DNS_ZONE}"));

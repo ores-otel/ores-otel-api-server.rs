@@ -5,8 +5,8 @@ use crate::routes;
 
 pub fn run(config: &ApiConfig) {
     println!("api bind {}", config.bind);
-    println!(
-        "{}",
-        serde_json::to_string(&routes::health::body()).expect("health json")
-    );
+    match serde_json::to_string(&routes::health::body()) {
+        Ok(body) => println!("{body}"),
+        Err(error) => eprintln!("health response serialization failed: {error}"),
+    }
 }
