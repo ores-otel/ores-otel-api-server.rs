@@ -3,6 +3,12 @@ on:
   pull_request:
     paths: ['.zpkg.toml', '.zpkg.lock', '.cli-flags.toml', 'Cargo.toml', 'Cargo.lock', '.github/workflows/ores-runtime-contracts.yml']
   workflow_dispatch:
+    inputs:
+      ores_cli_ref:
+        description: Immutable ORESoftware/ores-cli ref to verify
+        required: true
+        default: feab8fc32e7fb2828e208ed4430d584b4adc59d6
+        type: string
 permissions: { contents: read }
 concurrency:
   group: ores-runtime-contracts-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -12,37 +18,66 @@ env:
   ZED_CLI_REV: a1c5b7a3c72b957944b76911fcbc723dd9c16541
   FLAGS2ENV_REV: 333c2ace93c362d274171ab0e0edf613d96a8e59
 jobs:
-  smoke:
+  public-contracts:
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with: { ref: '${{ env.EXPECTED_HEAD }}', persist-credentials: false }
-      - name: Build pinned tools and execute authored contracts
+      - name: Build pinned public tools and execute authored contracts
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"; test -f .zpkg.toml; test -f .cli-flags.toml
-          git clone --filter=blob:none https://github.com/zed-pkg/zed-cli.git "$RUNNER_TEMP/zed-cli"; git -C "$RUNNER_TEMP/zed-cli" checkout --detach "$ZED_CLI_REV"; (cd "$RUNNER_TEMP/zed-cli" && cargo build --locked --release --bin zed)
-          git clone --filter=blob:none https://github.com/flags-2-env/flags-2-env.git "$RUNNER_TEMP/flags2env"; git -C "$RUNNER_TEMP/flags2env" checkout --detach "$FLAGS2ENV_REV"; make -C "$RUNNER_TEMP/flags2env" all
-          ZED="$RUNNER_TEMP/zed-cli/target/release/zed"
-          "$ZED" validate --manifest .zpkg.toml
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test -f .zpkg.toml
+          test -f .cli-flags.toml
+          git clone --filter=blob:none https://github.com/zed-pkg/zed-cli.git "$RUNNER_TEMP/zed-cli"
+          git -C "$RUNNER_TEMP/zed-cli" checkout --detach "$ZED_CLI_REV"
+          (cd "$RUNNER_TEMP/zed-cli" && cargo build --locked --release --bin zed)
+          git clone --filter=blob:none https://github.com/flags-2-env/flags-2-env.git "$RUNNER_TEMP/flags2env"
+          git -C "$RUNNER_TEMP/flags2env" checkout --detach "$FLAGS2ENV_REV"
+          make -C "$RUNNER_TEMP/flags2env" all
+          "$RUNNER_TEMP/zed-cli/target/release/zed" validate --manifest .zpkg.toml
           "$RUNNER_TEMP/flags2env/build/flags2env" audit .cli-flags.toml
-          TOOL_WS="$RUNNER_TEMP/ores-cli-smoke"
-          mkdir -p "$TOOL_WS"
-          installed=false
-          for attempt in 1 2 3; do
-            if (cd "$TOOL_WS" && "$ZED" install oresoftware/ores-cli@=0.1.0 --allow-build --adapter none); then
-              installed=true
-              break
-            fi
-            sleep $((attempt * 5))
-          done
-          test "$installed" = true
-          (
-            cd "$TOOL_WS"
-            "$ZED" run oresc -- --no-json audit repo --path "$GITHUB_WORKSPACE" --profile baseline
-            "$ZED" run ores-cli -- --no-json audit repo --path "$GITHUB_WORKSPACE" --profile baseline
-          )
           ! grep -R --line-number --fixed-strings 'github.com/ORESoftware/flags-2-env' Cargo.toml Cargo.lock .zpkg.toml 2>/dev/null
           git diff --exit-code HEAD
+
+  private-cli:
+    if: github.event_name == 'workflow_dispatch'
+    needs: public-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      ORES_CLI_READ_TOKEN: ${{ secrets.ORES_CLI_READ_TOKEN }}
+    steps:
+      - name: Require approved private-source credential
+        run: |
+          set -euo pipefail
+          test -n "${ORES_CLI_READ_TOKEN:-}" || {
+            echo 'ORES_CLI_READ_TOKEN is required for private ores-cli verification' >&2
+            exit 2
+          }
+      - name: Check out exact consumer revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: { ref: '${{ env.EXPECTED_HEAD }}', persist-credentials: false }
+      - name: Check out reviewed private ores-cli source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ORESoftware/ores-cli
+          ref: ${{ inputs.ores_cli_ref }}
+          token: ${{ secrets.ORES_CLI_READ_TOKEN }}
+          path: .private-tools/ores-cli
+          persist-credentials: false
+      - name: Build exact private CLI and execute baseline audits
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          CLI_DIR="$GITHUB_WORKSPACE/.private-tools/ores-cli"
+          git config --global url."https://x-access-token:${ORES_CLI_READ_TOKEN}@github.com/".insteadOf "https://github.com/"
+          trap 'git config --global --unset-all url.https://x-access-token:${ORES_CLI_READ_TOKEN}@github.com/.insteadOf || true' EXIT
+          (cd "$CLI_DIR" && cargo build --locked --release --bins)
+          export FLAGS2ENV_CONFIG="$CLI_DIR/.cli-flags.toml"
+          "$CLI_DIR/target/release/oresc" --no-json audit repo --path "$GITHUB_WORKSPACE" --profile baseline
+          "$CLI_DIR/target/release/ores-cli" --no-json audit repo --path "$GITHUB_WORKSPACE" --profile baseline
+          git diff --exit-code HEAD -- . ':(exclude).private-tools/**'
