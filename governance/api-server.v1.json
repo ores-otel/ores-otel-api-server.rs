@@ -1,0 +1,11 @@
+{
+  "schema": "ores.governance.api-server/v1",
+  "repository": "ores-otel/ores-otel-api-server.rs",
+  "routeRoot": "src/routes",
+  "requiredIngressNamespaces": ["rest", "rpc", "graphql", "ws"],
+  "restLeaves": ["health.rs", "v1.rs"],
+  "legacyFlatRoutesAllowed": false,
+  "domainAuthorityBinding": "contracts/upstream-authority.v1.json",
+  "contractAdmissionManifest": "contract-admission/contract-ir-consumer.json",
+  "generatedReadme": "generated/README.md"
+}
