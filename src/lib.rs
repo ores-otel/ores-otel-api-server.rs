@@ -11,3 +11,5 @@ pub mod routes;
 pub mod server;
 pub mod state;
 pub mod transport;
+
+pub use state::AppState;
