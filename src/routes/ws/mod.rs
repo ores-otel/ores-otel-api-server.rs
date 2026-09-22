@@ -1,4 +1,5 @@
 #![forbid(unsafe_code)]
 
-// WebSocket ingress routes live below this namespace. Protocol/session
-// implementations remain separate from transport ingress.
+pub mod v1;
+
+// WebSocket is standalone ingress only; it never owns semantic Lambda leaves.
