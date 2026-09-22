@@ -1,4 +1,6 @@
 #![forbid(unsafe_code)]
 
-pub mod health;
-pub mod v1;
+pub mod graphql;
+pub mod rest;
+pub mod rpc;
+pub mod ws;
