@@ -6,6 +6,7 @@ on:
       - feat/contracts-conformance-route-governance-20260921
     paths:
       - 'Cargo.toml'
+      - '.gitignore'
       - '.github/workflows/bootstrap-cargo-lock.yml'
 
 permissions:
@@ -22,17 +23,18 @@ jobs:
         with:
           ref: feat/contracts-conformance-route-governance-20260921
           persist-credentials: true
-      - name: Generate and commit missing lock only
+      - name: Generate, verify, commit lock, and remove bootstrap
         shell: bash
         run: |
           set -euo pipefail
           if git ls-files --error-unmatch Cargo.lock >/dev/null 2>&1; then
-            echo 'Cargo.lock is already tracked; nothing to do.'
-            exit 0
+            echo 'Cargo.lock is already tracked; remove one-shot bootstrap only.'
+          else
+            cargo generate-lockfile
+            cargo check --locked --all-targets
+            git add Cargo.lock
           fi
-          cargo generate-lockfile
-          cargo check --locked --all-targets
-          git add Cargo.lock
+          git rm .github/workflows/bootstrap-cargo-lock.yml
           git diff --cached --check
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
