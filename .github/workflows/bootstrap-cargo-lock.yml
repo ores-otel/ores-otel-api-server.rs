@@ -1,0 +1,40 @@
+name: bootstrap-cargo-lock-once
+
+on:
+  push:
+    branches:
+      - feat/contracts-conformance-route-governance-20260921
+    paths:
+      - 'Cargo.toml'
+      - '.github/workflows/bootstrap-cargo-lock.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    if: github.repository == 'ores-otel/ores-otel-api-server.rs'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out branch for one-time lock bootstrap
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/contracts-conformance-route-governance-20260921
+          persist-credentials: true
+      - name: Generate and commit missing lock only
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files --error-unmatch Cargo.lock >/dev/null 2>&1; then
+            echo 'Cargo.lock is already tracked; nothing to do.'
+            exit 0
+          fi
+          cargo generate-lockfile
+          cargo check --locked --all-targets
+          git add Cargo.lock
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'build: commit reproducible dependency lock'
+          git push origin HEAD:feat/contracts-conformance-route-governance-20260921
