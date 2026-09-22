@@ -8,9 +8,8 @@
 .env.*
 !.env.example
 *.sqlite
-Cargo.lock
 
-
+# Application repository: Cargo.lock is tracked for reproducible exact-head builds.
 
 # BEGIN ores-sops dotenv policy
 *.env
