@@ -1,6 +1,5 @@
 #![forbid(unsafe_code)]
 
-pub mod web_api_plane;
 pub mod auth;
 pub mod config;
 pub mod env;
