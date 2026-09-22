@@ -1,0 +1,21 @@
+schema_version = 1
+
+[compatibility]
+repository = "https://github.com/shared-auth/shared-auth-interfaces"
+commit = "b186443045ae22157522eaa064eace60bc95d100"
+
+[factors.two_factor]
+required = false
+methods = ["totp", "passkey"]
+
+[factors.three_factor]
+enabled = true
+methods = ["totp", "passkey"]
+
+[pages]
+show = ["sign-in", "challenge", "error"]
+
+[styling]
+theme = "system"
+brand_name = "ORES"
+accent_color = "#4F46E5"
