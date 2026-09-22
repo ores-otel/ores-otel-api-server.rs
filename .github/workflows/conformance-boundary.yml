@@ -60,16 +60,15 @@ jobs:
           node conformance/check.mjs
           node --check governance/check.mjs
           node governance/check.mjs
-      - name: Bootstrap missing lock once and compile exact dependency graph
+      - name: Require tracked lock and compile exact dependency graph
         shell: bash
         run: |
           set -euo pipefail
-          if ! git ls-files --error-unmatch Cargo.lock >/dev/null 2>&1; then
-            cargo generate-lockfile
-            echo '---BEGIN-CARGO-LOCK---'
-            cat Cargo.lock
-            echo '---END-CARGO-LOCK---'
+          git ls-files --error-unmatch Cargo.lock >/dev/null
+          test -f Cargo.lock
+          if git check-ignore -q Cargo.lock; then
+            echo 'Cargo.lock must not be ignored in this application repository' >&2
+            exit 1
           fi
           cargo check --locked --all-targets
-          git ls-files --error-unmatch Cargo.lock >/dev/null
           git diff --exit-code -- Cargo.toml Cargo.lock src/lib.rs src/routes/ src/rpc/ src/graphql/ src/server.rs contracts/ contract-admission/ conformance/ governance/ generated/
