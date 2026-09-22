@@ -1,4 +1,5 @@
 #![forbid(unsafe_code)]
 
-// GraphQL HTTP ingress routes live below this namespace. Resolver semantics
-// remain separate from transport ingress.
+pub mod v1;
+
+// GraphQL ingress lives here; semantic resolver leaves remain under src/graphql/**.
