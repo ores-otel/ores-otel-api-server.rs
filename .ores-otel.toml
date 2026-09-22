@@ -1,0 +1,26 @@
+version = 1
+
+[common]
+enabled = true
+
+[common.logging]
+enabled = true
+level = "info"
+console = true
+auto_send = false
+
+[common.tracing]
+enabled = true
+sample_ratio = 0.1
+propagators = ["tracecontext", "baggage"]
+
+[common.metrics]
+enabled = true
+
+[server]
+service_name = "ores-otel-api-server"
+
+# The API runtime does not install an implicit/global OTLP provider. Keep export
+# disabled until the application owns an explicit telemetry transport.
+[server.exporter]
+protocol = "none"
