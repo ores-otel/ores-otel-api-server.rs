@@ -12,6 +12,7 @@ repository_role = "api"
 
 [dependencies]
 axum = { version = "0.8", features = ["json", "macros"] }
+flags2env = { git = "https://github.com/flags-2-env/flags-2-env.git", rev = "377bff1a4e7424eb98377997a232ddc0fc700f59", package = "flags2env" }
 ores-api-docs = { git = "https://github.com/ORESoftware/api-docs.git", rev = "cdc3715ae0a7cb635fa01d96aecec60b7f5d6b2c", package = "ores-api-docs", features = ["axum"] }
 ores-api-docs-operation-macros = { git = "https://github.com/ORESoftware/api-docs.git", rev = "cdc3715ae0a7cb635fa01d96aecec60b7f5d6b2c", package = "ores-api-docs-operation-macros" }
 serde = { version = "1", features = ["derive"] }
