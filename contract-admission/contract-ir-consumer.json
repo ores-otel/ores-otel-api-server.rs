@@ -1,0 +1,31 @@
+{
+  "schema": "ores.contract-ir-consumer/v1",
+  "repository": "ores-otel/ores-otel-api-server.rs",
+  "repositoryRole": "api-server",
+  "canonicalAuthorityRepository": "ores-otel/ores-interfaces",
+  "evidenceScope": "repository-local-canary-only",
+  "validator": {
+    "repository": "ORESoftware/typespec-json-schema-validator",
+    "actionCommit": "bd503465dab8c5148fee722b443ed04ff126c9bf",
+    "contractIrSchema": "ores.typespec-json-schema-validator.contract-ir/v1"
+  },
+  "authorityModel": {
+    "typespec": "independently-authored-peer-authority",
+    "jsonSchema": "independently-authored-peer-authority",
+    "generatedJsonSchema": "comparison-evidence-only",
+    "precedence": "none"
+  },
+  "admission": {
+    "requirePassedReceipt": true,
+    "requireAdmissibleContractIr": true,
+    "requireZeroUnexplainedFindings": true,
+    "rejectEditableAuthority": true,
+    "allowFallbackAuthority": false
+  },
+  "downstreamResponsibilities": [
+    "consume-admitted-contract-ir",
+    "preserve-rest-rpc-graphql-ws-ingress-split",
+    "retain-ir-and-generator-digests",
+    "block-promotion-on-stale-evidence"
+  ]
+}
