@@ -1,0 +1,18 @@
+{
+  "schema": "ores.conformance.bootstrap/v1",
+  "repository": "ores-otel/ores-otel-api-server.rs",
+  "id": "authority-boundary",
+  "contractRoot": "contracts/",
+  "status": "bootstrap-only",
+  "expected": {
+    "contractsRemainAuthoritative": true,
+    "conformanceIsSharedAcrossImplementations": true,
+    "runtimeSpecificGoldensAllowed": false,
+    "staleEvidenceAccepted": false,
+    "missingRequiredRuntimeEvidenceAccepted": false
+  },
+  "notes": [
+    "This bootstrap document establishes the API-server contract/conformance boundary only.",
+    "Add transport and operation behavior cases with evidence before claiming behavioral coverage."
+  ]
+}
