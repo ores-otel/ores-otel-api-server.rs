@@ -9,7 +9,7 @@ on:
       - '.ores-otel.toml'
       - '.shared-auth.toml'
       - 'config/ores-middleware-stack.json'
-      - 'conformance/check-runtime-configs.rs'
+      - 'conformance/tests/check-runtime-configs.rs'
       - '.github/workflows/runtime-config-conformance.yml'
   push:
     branches: [main]
@@ -20,7 +20,7 @@ on:
       - '.ores-otel.toml'
       - '.shared-auth.toml'
       - 'config/ores-middleware-stack.json'
-      - 'conformance/check-runtime-configs.rs'
+      - 'conformance/tests/check-runtime-configs.rs'
       - '.github/workflows/runtime-config-conformance.yml'
 
 permissions:
@@ -55,7 +55,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rustc --edition=2024 -D warnings -o "$RUNNER_TEMP/check-runtime-configs" conformance/check-runtime-configs.rs
+          rustc --edition=2024 -D warnings -o "$RUNNER_TEMP/check-runtime-configs" conformance/tests/check-runtime-configs.rs
 
       - name: Prove exact-head runtime contracts
         shell: bash
