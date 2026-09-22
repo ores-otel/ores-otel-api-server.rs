@@ -1,0 +1,12 @@
+{
+  "schema": "ores.contract-authority-binding/v1",
+  "repository": "ores-otel/ores-otel-interfaces",
+  "commit": "ad83395ba2726f6e687ab66fd25968f43b2e39b1",
+  "path": "contracts/",
+  "mode": "external-pinned",
+  "receipts": {
+    "contractsSha256": "55805337d47c6dceb0d5aed6e2e800d5bd25222d79111d729c603a78a6533f00",
+    "corpusSha256": "b5dfa871ae5ccf8a27be383e2bab8e395d8fcfa666d7025f613ae94d135125ca",
+    "conformanceSpecSha256": "560173ddb004cf866b6f23b4d1bc1d437fd8ebbb171277ae8d35af93f049d93c"
+  }
+}
