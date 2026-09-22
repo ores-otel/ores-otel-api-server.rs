@@ -9,7 +9,7 @@ use crate::AppState;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct HealthBody {
     pub ok: bool,
-    pub service: &'static str,
+    pub service: String,
 }
 
 pub struct HealthOperation;
@@ -32,7 +32,7 @@ impl OperationSpec for HealthOperation {
 pub fn body() -> HealthBody {
     HealthBody {
         ok: true,
-        service: "ores-otel-api-server",
+        service: "ores-otel-api-server".to_owned(),
     }
 }
 
