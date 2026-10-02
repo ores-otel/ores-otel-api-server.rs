@@ -20,7 +20,7 @@ enabled = true
 [server]
 service_name = "ores-otel-api-server"
 
-# The base template has no implicit/global OTLP provider. Keep export disabled
-# until the application installs an explicit application-owned OTel transport.
+# The API runtime does not install an implicit/global OTLP provider. Keep export
+# disabled until the application owns an explicit telemetry transport.
 [server.exporter]
 protocol = "none"

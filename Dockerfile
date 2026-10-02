@@ -79,10 +79,9 @@ COPY --from=planner /app/recipe.json recipe.json
 #     compiled dependencies are baked into the layer and survive a cold CI
 #     runner, which a host-local BuildKit cache does not. That matters directly
 #     to the GitHub Actions minutes budget.
-# NOTE: no Cargo.lock is tracked on this branch, so the build cannot pass
-# --locked and two builds of the same commit can resolve different dependency
-# versions. For a binary crate the lockfile belongs in version control: commit
-# one and add --locked to both cargo invocations below.
+# Cargo.lock is tracked on current main. Keep both dependency cooking and the
+# final application build locked so the same source commit resolves the same
+# dependency graph in local and hosted builds.
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-registry,sharing=locked \
     --mount=type=cache,target=/usr/local/cargo/git,id=cargo-git,sharing=locked \
     --mount=type=secret,id=gh_token \
@@ -95,7 +94,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-registry,sharin
       export GIT_CONFIG_KEY_1="url.https://x-access-token:${t}@github.com/.insteadOf"; \
       export GIT_CONFIG_VALUE_1="ssh://git@github.com/"; \
     fi; \
-    cargo chef cook --release --recipe-path recipe.json
+    cargo chef cook --release --locked --recipe-path recipe.json
 
 # (2) Bring in the real source and compile just this crate against the cooked
 #     dependency artifacts already in /app/target.
@@ -112,7 +111,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-registry,sharin
       export GIT_CONFIG_KEY_1="url.https://x-access-token:${t}@github.com/.insteadOf"; \
       export GIT_CONFIG_VALUE_1="ssh://git@github.com/"; \
     fi; \
-    cargo build --release --bin ores-otel-api-server; \
+    cargo build --release --locked --bin ores-otel-api-server; \
     strip target/release/ores-otel-api-server; \
     cp target/release/ores-otel-api-server /usr/local/bin/ores-otel-api-server
 

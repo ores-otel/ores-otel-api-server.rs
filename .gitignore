@@ -8,9 +8,8 @@
 .env.*
 !.env.example
 *.sqlite
-Cargo.lock
 
-
+# Application repository: Cargo.lock is tracked for reproducible exact-head builds.
 
 # BEGIN ores-sops dotenv policy
 *.env
@@ -32,7 +31,11 @@ temp/
 # typespec-json-schema-validator comparison evidence (generated; never an authority)
 .typespec-json-schema-validator/
 # Repository-local temporary data and authorized Git worktrees
-tmp
-temp
 tmp/worktrees
 temp/worktrees
+
+# machine-local symlink to ORESoftware/my-ai AGENTS.md; never committed
+.ores/
+
+# build output (DEN-3945 conformance): never tracked
+target/

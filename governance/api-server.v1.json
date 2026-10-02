@@ -1,0 +1,20 @@
+{
+  "schema": "ores.governance.api-server/v1",
+  "repository": "ores-otel/ores-otel-api-server.rs",
+  "packageRole": "api",
+  "apiDocsRevision": "cdc3715ae0a7cb635fa01d96aecec60b7f5d6b2c",
+  "routeRoot": "src/routes",
+  "requiredIngressNamespaces": ["rest", "rpc", "graphql", "ws"],
+  "ingressMounts": {
+    "rpc": "src/routes/rpc/v1/route.rs",
+    "graphql": "src/routes/graphql/v1/route.rs",
+    "ws": "src/routes/ws/v1/route.rs"
+  },
+  "executableLeafRoots": ["src/routes/rest", "src/rpc", "src/graphql"],
+  "restLeaves": ["health", "v1"],
+  "legacyFlatRoutesAllowed": false,
+  "ingressSemanticAuthorityAllowed": false,
+  "domainAuthorityBinding": "contracts/upstream-authority.v1.json",
+  "contractAdmissionManifest": "contract-admission/contract-ir-consumer.json",
+  "generatedReadme": "generated/README.md"
+}

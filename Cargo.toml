@@ -1,26 +1,23 @@
-    [package]
-    name = "ores-otel-api-server"
-    version = "0.1.0"
-    edition = "2021"
-    license = "MIT"
-    description = "JSON API server for ores-otel"
-    repository = "https://github.com/ores-otel/ores-otel-api-server.rs"
+[package]
+name = "ores-otel-api-server"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+license = "MIT"
+description = "JSON API server for ores-otel"
+repository = "https://github.com/ores-otel/ores-otel-api-server.rs"
 
-    [features]
-    default = ["tcp-transport", "nats-transport"]
-    tcp-transport = []
-    nats-transport = []
+[package.metadata.ores]
+repository_role = "api"
 
-    [dependencies]
-k8s-web-api-data-plane = { git = "https://github.com/ORESoftware/k8s-libs-and-shared-defs.git", rev = "55adadc9f6d223d40b28ae66097dfe16930951b1", package = "k8s-web-api-data-plane" }
-ores-transport = { git = "https://github.com/ORESoftware/ores-transport.git", rev = "c544e1a11a212dc43a5c1f87ea70a95939e80e2e" }
-tokio = { version = "1", features = ["net"] }
-    serde = { version = "1", features = ["derive"] }
-    serde_json = "1"
-    thiserror = "2"
-    flags2env = { git = "https://github.com/ORESoftware/flags-2-env.git", rev = "377bff1a4e7424eb98377997a232ddc0fc700f59" }
+[dependencies]
+axum = { version = "0.8", features = ["json", "macros"] }
+flags2env = { git = "https://github.com/flags-2-env/flags-2-env.git", rev = "377bff1a4e7424eb98377997a232ddc0fc700f59", package = "flags2env" }
+ores-api-docs = { git = "https://github.com/ORESoftware/api-docs.git", rev = "cdc3715ae0a7cb635fa01d96aecec60b7f5d6b2c", package = "ores-api-docs", features = ["axum"] }
+ores-api-docs-operation-macros = { git = "https://github.com/ORESoftware/api-docs.git", rev = "cdc3715ae0a7cb635fa01d96aecec60b7f5d6b2c", package = "ores-api-docs-operation-macros" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
 
 [lints.rust]
 unsafe_code = "forbid"
-
-

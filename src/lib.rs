@@ -1,13 +1,16 @@
 #![forbid(unsafe_code)]
 
-pub mod web_api_plane;
 pub mod auth;
 pub mod config;
 pub mod env;
 pub mod env_map;
 pub mod error;
 pub mod flags;
+pub mod graphql;
 pub mod routes;
+pub mod rpc;
 pub mod server;
 pub mod state;
 pub mod transport;
+
+pub use state::AppState;
