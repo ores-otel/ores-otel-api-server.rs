@@ -22,5 +22,7 @@ jobs:
         with:
           toolchain: "1.95.0"
           components: rustfmt
+      - name: Check formatting of changed production and integration files
+        run: rustfmt --edition 2021 --check src/server.rs tests/live_http_e2e.rs
       - name: Real HTTP socket tests
         run: cargo test --locked --test live_http_e2e -- --nocapture
