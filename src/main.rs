@@ -11,5 +11,8 @@ fn main() {
         }
     };
     let cfg = ApiConfig::from_env_map(&env);
-    server::run(&cfg);
+    if let Err(error) = server::run(&cfg) {
+        eprintln!("failed to start API server: {error}");
+        std::process::exit(1);
+    }
 }

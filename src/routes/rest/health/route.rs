@@ -17,7 +17,9 @@ use crate::AppState;
 use super::handlers::{self, HealthOperation};
 
 pub(crate) fn router() -> Router<AppState> {
-    Router::new().route("/health", axum_get(get))
+    Router::new()
+        .route("/health", axum_get(get))
+        .route("/v1/health", axum_get(get))
 }
 
 #[ores_route(operation = handlers::get_health)]
