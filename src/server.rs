@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
-use std::future::Future;
 use crate::{config::ApiConfig, routes, AppState};
+use std::future::Future;
 
 /// Use one listener for every authored route projection and let the caller own shutdown.
 /// The listener is injected by E2E tests to avoid a port-race and assert real TCP behavior.
