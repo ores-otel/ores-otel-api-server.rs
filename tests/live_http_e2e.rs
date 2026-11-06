@@ -127,7 +127,9 @@ async fn readonly_routes_survive_head_query_and_rejected_method_over_tcp() {
     for method in ["PUT", "DELETE", "PATCH"] {
         let denied = exchange(
             address,
-            &format!("{method} /v1/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n"),
+            &format!(
+                "{method} /v1/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n"
+            ),
         )
         .await
         .unwrap();
