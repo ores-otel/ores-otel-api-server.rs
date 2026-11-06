@@ -1,0 +1,11 @@
+import class HttpHealthGate from "../src/http_health_gate";
+pub routine main() -> int {
+  let mut HttpHealthGate gate = new HttpHealthGate(2);
+  if !gate.admit(1, 1); then return 1; fi
+  if gate.admit(2, 1); then return 2; fi
+  if gate.admit(1, 2); then return 3; fi
+  if !gate.admit(1, 1); then return 4; fi
+  if gate.admit(1, 1); then return 5; fi
+  if gate.count() != 2; then return 6; fi
+  return 0;
+}

@@ -1,0 +1,28 @@
+name: live-http-e2e
+on:
+  pull_request:
+    paths: ["src/**", "tests/live_http_e2e.rs", "Cargo.toml", "Cargo.lock", "atto/**", ".github/workflows/live-http-e2e.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-http:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+          persist-credentials: false
+      - name: Assert pinned head
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+        with:
+          toolchain: "1.95.0"
+          components: rustfmt
+      - name: Source format
+        run: cargo fmt --all -- --check
+      - name: Real HTTP socket tests
+        run: cargo test --locked --test live_http_e2e -- --nocapture

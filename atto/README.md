@@ -1,0 +1,1 @@
+Native AttoLang symbolic health admission guest. Not compiler-executed: network CI validates the Rust server, not this guest. Do not claim backend parity until the exact-head .atto file compiles and runs with a nonzero-exit mutation test.

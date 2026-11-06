@@ -1,0 +1,20 @@
+// AttoLang candidate for a bounded read-only API health projection.
+define pub class HttpHealthGate as
+  val int maximum_requests;
+  let int served = 0;
+
+  pub constructor(int maximum_requests) {
+    self.maximum_requests = maximum_requests;
+  }
+
+  pub fnc admit(mut self)(int method_code, int route_code) -> bool {
+    // Method 1 is GET; route 1 is health. This is a symbolic contract,
+    // not a host HTTP parser or a transport implementation.
+    if method_code != 1 || route_code != 1; then return false; fi
+    if self.maximum_requests < 1 || self.served >= self.maximum_requests; then return false; fi
+    self.served = self.served + 1;
+    return true;
+  }
+
+  pub count() -> int { return self.served; }
+end
